@@ -979,7 +979,7 @@
             chainId: BASE_CHAIN_HEX,
             chainName: "Base",
             nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
-            rpcUrls: ["https://mainnet.base.org"],
+            rpcUrls: RPC_URLS,
             blockExplorerUrls: [BASESCAN],
           }],
         });
@@ -1052,11 +1052,30 @@
       </div>`;
   }
 
+  const RPC_URLS = [
+    "https://base.llamarpc.com",
+    "https://base-rpc.publicnode.com",
+    "https://mainnet.base.org",
+  ];
+
+  async function getFallbackProvider() {
+    for (const url of RPC_URLS) {
+      try {
+        const p = new ethers.JsonRpcProvider(url);
+        await p.getBlockNumber();
+        return p;
+      } catch (_) {
+        // try next
+      }
+    }
+    throw new Error("All RPC endpoints failed");
+  }
+
   async function loadMessages() {
     messagesList.innerHTML = skeletonCard(3) + skeletonCard(2) + skeletonCard(2);
 
     try {
-      const readProvider = provider || new ethers.JsonRpcProvider("https://mainnet.base.org");
+      const readProvider = provider || await getFallbackProvider();
       const readContract = new ethers.Contract(CONTRACT_ADDRESS, ABI, readProvider);
       const messages     = await readContract.getMessages();
 
