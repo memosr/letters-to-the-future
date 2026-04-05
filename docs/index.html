@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Letters to the Future</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg: #0a0a0f;
+      --gold: #f0c060;
+      --gold-dim: #c89840;
+      --gold-glow: rgba(240, 192, 96, 0.15);
+      --white: #f0ece4;
+      --white-dim: rgba(240, 236, 228, 0.55);
+      --card-bg: rgba(255, 255, 255, 0.03);
+      --card-border: rgba(240, 192, 96, 0.12);
+      --card-border-hover: rgba(240, 192, 96, 0.35);
+      --radius: 12px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--white);
+      font-family: 'Lora', Georgia, serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Stars ── */
+    #stars-canvas {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.7;
+    }
+
+    /* ── Layout ── */
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 0 20px 80px;
+    }
+
+    /* ── Header ── */
+    header {
+      text-align: center;
+      padding: 72px 0 48px;
+    }
+
+    .header-symbol {
+      font-size: 2rem;
+      letter-spacing: 0.25em;
+      color: var(--gold);
+      opacity: 0.6;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      font-size: clamp(2rem, 5vw, 2.8rem);
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      color: var(--white);
+      line-height: 1.2;
+      margin-bottom: 14px;
+    }
+
+    .tagline {
+      font-style: italic;
+      font-size: 1rem;
+      color: var(--white-dim);
+      line-height: 1.7;
+      max-width: 420px;
+      margin: 0 auto 36px;
+    }
+
+    /* ── Wallet button ── */
+    #connect-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 28px;
+      background: transparent;
+      border: 1px solid var(--gold-dim);
+      color: var(--gold);
+      font-family: inherit;
+      font-size: 0.9rem;
+      letter-spacing: 0.06em;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+
+    #connect-btn:hover {
+      background: var(--gold-glow);
+      border-color: var(--gold);
+      box-shadow: 0 0 20px var(--gold-glow);
+    }
+
+    #connect-btn .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--gold-dim);
+      transition: background 0.25s;
+    }
+
+    #connect-btn.connected .dot {
+      background: #4ade80;
+      box-shadow: 0 0 6px rgba(74, 222, 128, 0.6);
+    }
+
+    /* ── Network warning ── */
+    #network-warning {
+      display: none;
+      margin-top: 14px;
+      padding: 10px 18px;
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      border-radius: 8px;
+      font-size: 0.85rem;
+      color: #fca5a5;
+      text-align: center;
+    }
+
+    #network-warning button {
+      margin-left: 10px;
+      background: none;
+      border: none;
+      color: var(--gold);
+      font-family: inherit;
+      font-size: 0.85rem;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+    /* ── Compose ── */
+    .compose-section {
+      margin-top: 48px;
+    }
+
+    .section-label {
+      font-size: 0.75rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--gold-dim);
+      margin-bottom: 14px;
+    }
+
+    #message-input {
+      width: 100%;
+      min-height: 130px;
+      padding: 18px 20px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(240, 192, 96, 0.2);
+      border-radius: var(--radius);
+      color: var(--white);
+      font-family: 'Lora', Georgia, serif;
+      font-size: 1rem;
+      line-height: 1.7;
+      resize: vertical;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+    }
+
+    #message-input::placeholder {
+      color: rgba(240, 236, 228, 0.25);
+      font-style: italic;
+    }
+
+    #message-input:focus {
+      border-color: rgba(240, 192, 96, 0.5);
+      box-shadow: 0 0 0 3px rgba(240, 192, 96, 0.06);
+    }
+
+    .compose-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 12px;
+    }
+
+    #char-counter {
+      font-size: 0.8rem;
+      color: var(--white-dim);
+      transition: color 0.2s;
+    }
+
+    #char-counter.warn { color: #fbbf24; }
+    #char-counter.over { color: #f87171; }
+
+    #submit-btn {
+      padding: 12px 30px;
+      background: linear-gradient(135deg, #c89840, #f0c060);
+      border: none;
+      border-radius: 50px;
+      color: #0a0a0f;
+      font-family: 'Lora', Georgia, serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+
+    #submit-btn:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 24px rgba(240, 192, 96, 0.3);
+    }
+
+    #submit-btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* ── Status messages ── */
+    #status-area {
+      margin-top: 18px;
+      min-height: 44px;
+    }
+
+    .status-msg {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      line-height: 1.5;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .status-loading {
+      background: rgba(240, 192, 96, 0.07);
+      border: 1px solid rgba(240, 192, 96, 0.2);
+      color: var(--gold);
+    }
+
+    .status-success {
+      background: rgba(74, 222, 128, 0.07);
+      border: 1px solid rgba(74, 222, 128, 0.2);
+      color: #86efac;
+    }
+
+    .status-error {
+      background: rgba(239, 68, 68, 0.07);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      color: #fca5a5;
+    }
+
+    .status-msg a {
+      color: inherit;
+      font-weight: 600;
+      text-underline-offset: 2px;
+    }
+
+    /* Spinner */
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(240, 192, 96, 0.3);
+      border-top-color: var(--gold);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      flex-shrink: 0;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ── Divider ── */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin: 52px 0 36px;
+    }
+
+    .divider-line {
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(to right, transparent, rgba(240, 192, 96, 0.2), transparent);
+    }
+
+    .divider-icon {
+      color: var(--gold-dim);
+      font-size: 1rem;
+      opacity: 0.6;
+    }
+
+    /* ── Messages feed ── */
+    .feed-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 20px;
+    }
+
+    #msg-count {
+      font-size: 0.8rem;
+      color: var(--white-dim);
+    }
+
+    #messages-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .msg-card {
+      padding: 22px 24px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .msg-card:hover {
+      border-color: var(--card-border-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    }
+
+    .msg-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .msg-address {
+      font-size: 0.78rem;
+      letter-spacing: 0.06em;
+      color: var(--gold-dim);
+      font-family: 'Courier New', monospace;
+    }
+
+    .msg-date {
+      font-size: 0.75rem;
+      color: rgba(240, 236, 228, 0.35);
+      font-style: italic;
+    }
+
+    .msg-text {
+      font-size: 0.97rem;
+      line-height: 1.75;
+      color: var(--white);
+      word-break: break-word;
+    }
+
+    /* ── Empty / Loading states ── */
+    .feed-empty {
+      text-align: center;
+      padding: 48px 20px;
+      color: var(--white-dim);
+      font-style: italic;
+      font-size: 0.95rem;
+      line-height: 1.8;
+    }
+
+    .feed-loading {
+      display: flex;
+      justify-content: center;
+      padding: 40px;
+    }
+
+    .feed-loading .spinner {
+      width: 24px;
+      height: 24px;
+    }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      margin-top: 72px;
+      padding-top: 32px;
+      border-top: 1px solid rgba(240, 192, 96, 0.08);
+      font-size: 0.78rem;
+      color: rgba(240, 236, 228, 0.25);
+      letter-spacing: 0.04em;
+    }
+
+    footer a {
+      color: rgba(240, 192, 96, 0.4);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    footer a:hover { color: var(--gold); }
+
+    /* ── Responsive ── */
+    @media (max-width: 480px) {
+      header { padding: 52px 0 36px; }
+      .compose-footer { flex-direction: column; align-items: flex-end; gap: 12px; }
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="stars-canvas"></canvas>
+
+<div class="container">
+
+  <header>
+    <div class="header-symbol">✦ &nbsp; ✦ &nbsp; ✦</div>
+    <h1>Letters to the Future</h1>
+    <p class="tagline">Leave a message on the blockchain — for someone you'll never meet, in a time you'll never see.</p>
+    <button id="connect-btn">
+      <span class="dot"></span>
+      <span id="connect-label">Connect Wallet</span>
+    </button>
+    <div id="network-warning">
+      You're on the wrong network.
+      <button id="switch-network-btn">Switch to Base</button>
+    </div>
+  </header>
+
+  <section class="compose-section">
+    <div class="section-label">Your letter</div>
+    <textarea
+      id="message-input"
+      maxlength="280"
+      placeholder="What do you want the future to know? Write something that matters…"
+    ></textarea>
+    <div class="compose-footer">
+      <span id="char-counter">0 / 280</span>
+      <button id="submit-btn" disabled>Send to the Future</button>
+    </div>
+    <div id="status-area"></div>
+  </section>
+
+  <div class="divider">
+    <div class="divider-line"></div>
+    <span class="divider-icon">◈</span>
+    <div class="divider-line"></div>
+  </div>
+
+  <section>
+    <div class="feed-header">
+      <div class="section-label" style="margin-bottom:0">Messages from the past</div>
+      <span id="msg-count"></span>
+    </div>
+    <div id="messages-list">
+      <div class="feed-loading"><div class="spinner"></div></div>
+    </div>
+  </section>
+
+  <footer>
+    <p>Permanent on <a href="https://base.org" target="_blank" rel="noopener">Base</a> &nbsp;·&nbsp; Contract <a id="contract-link" href="https://basescan.org/address/0x526a3e3ace6f5ef40ec8ddb8e87995f9a8271000" target="_blank" rel="noopener">0x526a…1000</a></p>
+  </footer>
+
+</div>
+
+<script type="module">
+  import { ethers } from "https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.min.js";
+
+  // ── Config ──────────────────────────────────────────────────────────────
+  const CONTRACT_ADDRESS = "0x526a3e3ace6f5ef40ec8ddb8e87995f9a8271000";
+  const BASE_CHAIN_ID    = 8453;
+  const BASE_CHAIN_HEX   = "0x" + BASE_CHAIN_ID.toString(16);
+  const BASESCAN         = "https://basescan.org";
+
+  const ABI = [
+    "function postMessage(string memory message) external",
+    "function getMessages() external view returns (string[] memory)",
+    "function getMessageCount() external view returns (uint256)",
+  ];
+
+  // ── State ────────────────────────────────────────────────────────────────
+  let provider = null;
+  let signer   = null;
+  let contract = null;
+  let userAddress = null;
+
+  // ── DOM ──────────────────────────────────────────────────────────────────
+  const connectBtn      = document.getElementById("connect-btn");
+  const connectLabel    = document.getElementById("connect-label");
+  const networkWarning  = document.getElementById("network-warning");
+  const switchNetBtn    = document.getElementById("switch-network-btn");
+  const messageInput    = document.getElementById("message-input");
+  const charCounter     = document.getElementById("char-counter");
+  const submitBtn       = document.getElementById("submit-btn");
+  const statusArea      = document.getElementById("status-area");
+  const messagesList    = document.getElementById("messages-list");
+  const msgCount        = document.getElementById("msg-count");
+
+  // ── Stars canvas ─────────────────────────────────────────────────────────
+  (function initStars() {
+    const canvas = document.getElementById("stars-canvas");
+    const ctx    = canvas.getContext("2d");
+    let stars    = [];
+
+    function resize() {
+      canvas.width  = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+
+    function generateStars(n) {
+      stars = [];
+      for (let i = 0; i < n; i++) {
+        stars.push({
+          x:     Math.random() * canvas.width,
+          y:     Math.random() * canvas.height,
+          r:     Math.random() * 1.2 + 0.2,
+          alpha: Math.random() * 0.7 + 0.1,
+          speed: Math.random() * 0.0004 + 0.0001,
+          phase: Math.random() * Math.PI * 2,
+        });
+      }
+    }
+
+    function draw(ts) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (const s of stars) {
+        const a = s.alpha * (0.6 + 0.4 * Math.sin(ts * s.speed + s.phase));
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(240,220,160,${a})`;
+        ctx.fill();
+      }
+      requestAnimationFrame(draw);
+    }
+
+    resize();
+    generateStars(220);
+    requestAnimationFrame(draw);
+    window.addEventListener("resize", () => { resize(); generateStars(220); });
+  })();
+
+  // ── Wallet connection ────────────────────────────────────────────────────
+  async function connectWallet() {
+    if (!window.ethereum) {
+      showStatus("error", "No wallet detected. Please install MetaMask.");
+      return;
+    }
+    try {
+      await window.ethereum.request({ method: "eth_requestAccounts" });
+      await setupProvider();
+    } catch (e) {
+      if (e.code !== 4001) showStatus("error", "Could not connect: " + (e.message || e));
+    }
+  }
+
+  async function setupProvider() {
+    provider    = new ethers.BrowserProvider(window.ethereum);
+    const network = await provider.getNetwork();
+    const chainId = Number(network.chainId);
+
+    if (chainId !== BASE_CHAIN_ID) {
+      networkWarning.style.display = "block";
+      updateConnectBtn(null);
+      return;
+    }
+
+    networkWarning.style.display = "none";
+    signer   = await provider.getSigner();
+    userAddress = await signer.getAddress();
+    contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
+
+    updateConnectBtn(userAddress);
+    updateSubmitState();
+    loadMessages();
+  }
+
+  function updateConnectBtn(addr) {
+    if (addr) {
+      connectBtn.classList.add("connected");
+      connectLabel.textContent = shorten(addr);
+    } else {
+      connectBtn.classList.remove("connected");
+      connectLabel.textContent = "Connect Wallet";
+    }
+  }
+
+  async function switchToBase() {
+    try {
+      await window.ethereum.request({
+        method: "wallet_switchEthereumChain",
+        params: [{ chainId: BASE_CHAIN_HEX }],
+      });
+    } catch (e) {
+      if (e.code === 4902) {
+        await window.ethereum.request({
+          method: "wallet_addEthereumChain",
+          params: [{
+            chainId: BASE_CHAIN_HEX,
+            chainName: "Base",
+            nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
+            rpcUrls: ["https://mainnet.base.org"],
+            blockExplorerUrls: [BASESCAN],
+          }],
+        });
+      }
+    }
+  }
+
+  // ── Character counter ─────────────────────────────────────────────────────
+  messageInput.addEventListener("input", () => {
+    const len = messageInput.value.length;
+    charCounter.textContent = `${len} / 280`;
+    charCounter.className   = len > 260 ? (len >= 280 ? "over" : "warn") : "";
+    updateSubmitState();
+  });
+
+  function updateSubmitState() {
+    const ready = userAddress && messageInput.value.trim().length > 0 && messageInput.value.length <= 280;
+    submitBtn.disabled = !ready;
+  }
+
+  // ── Send transaction ──────────────────────────────────────────────────────
+  submitBtn.addEventListener("click", async () => {
+    const msg = messageInput.value.trim();
+    if (!msg || !contract) return;
+
+    submitBtn.disabled  = true;
+    messageInput.disabled = true;
+
+    showStatus("loading", "Waiting for confirmation…");
+
+    try {
+      const tx = await contract.postMessage(msg);
+      showStatus("loading", "Transaction sent — mining on Base…");
+      const receipt = await tx.wait();
+      const txHash = receipt.hash;
+
+      showStatus("success",
+        `Your letter is sealed. &nbsp;<a href="${BASESCAN}/tx/${txHash}" target="_blank" rel="noopener">View on Basescan ↗</a>`
+      );
+
+      messageInput.value    = "";
+      charCounter.textContent = "0 / 280";
+      charCounter.className   = "";
+      loadMessages();
+    } catch (e) {
+      if (e.code === 4001 || e.code === "ACTION_REJECTED") {
+        showStatus("error", "Transaction cancelled.");
+      } else {
+        showStatus("error", "Something went wrong: " + (e.shortMessage || e.message || e));
+      }
+    } finally {
+      messageInput.disabled = false;
+      updateSubmitState();
+    }
+  });
+
+  // ── Load messages ─────────────────────────────────────────────────────────
+  async function loadMessages() {
+    messagesList.innerHTML = '<div class="feed-loading"><div class="spinner"></div></div>';
+
+    try {
+      // Use a read-only provider so messages load even before wallet connect
+      const readProvider = provider
+        || new ethers.JsonRpcProvider("https://mainnet.base.org");
+      const readContract = new ethers.Contract(CONTRACT_ADDRESS, ABI, readProvider);
+
+      const messages = await readContract.getMessages();
+
+      if (!messages || messages.length === 0) {
+        msgCount.textContent = "";
+        messagesList.innerHTML = `
+          <div class="feed-empty">
+            No letters yet.<br />Be the first to write to the future.
+          </div>`;
+        return;
+      }
+
+      // Fetch sender addresses from Transfer/PostMessage logs if available,
+      // otherwise display messages without addresses (graceful degradation).
+      const count = messages.length;
+      msgCount.textContent = `${count} letter${count !== 1 ? "s" : ""}`;
+
+      // Render newest first (reverse index order)
+      const frag = document.createDocumentFragment();
+      for (let i = count - 1; i >= 0; i--) {
+        const card = buildCard(null, messages[i], null);
+        frag.appendChild(card);
+      }
+      messagesList.innerHTML = "";
+      messagesList.appendChild(frag);
+
+    } catch (e) {
+      messagesList.innerHTML = `
+        <div class="feed-empty">
+          Could not load messages. Check your connection and try again.
+        </div>`;
+    }
+  }
+
+  function buildCard(address, text, timestamp) {
+    const card = document.createElement("div");
+    card.className = "msg-card";
+
+    const meta = document.createElement("div");
+    meta.className = "msg-meta";
+
+    const addrEl = document.createElement("span");
+    addrEl.className = "msg-address";
+    addrEl.textContent = address ? shorten(address) : "anonymous";
+
+    const dateEl = document.createElement("span");
+    dateEl.className = "msg-date";
+    dateEl.textContent = timestamp
+      ? formatDate(new Date(timestamp * 1000))
+      : "sealed in time";
+
+    const textEl = document.createElement("p");
+    textEl.className = "msg-text";
+    textEl.textContent = text;
+
+    meta.appendChild(addrEl);
+    meta.appendChild(dateEl);
+    card.appendChild(meta);
+    card.appendChild(textEl);
+    return card;
+  }
+
+  // ── Status helper ─────────────────────────────────────────────────────────
+  function showStatus(type, html) {
+    const cls = { loading: "status-loading", success: "status-success", error: "status-error" }[type];
+    const icon = type === "loading"
+      ? '<div class="spinner"></div>'
+      : (type === "success" ? "✦" : "✕");
+    statusArea.innerHTML = `<div class="status-msg ${cls}">${icon}<span>${html}</span></div>`;
+  }
+
+  // ── Utilities ─────────────────────────────────────────────────────────────
+  function shorten(addr) {
+    return addr.slice(0, 6) + "…" + addr.slice(-4);
+  }
+
+  function formatDate(d) {
+    return d.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+  }
+
+  // ── Event listeners ───────────────────────────────────────────────────────
+  connectBtn.addEventListener("click", () => {
+    if (userAddress) return; // already connected
+    connectWallet();
+  });
+
+  switchNetBtn.addEventListener("click", async () => {
+    await switchToBase();
+    await setupProvider();
+  });
+
+  if (window.ethereum) {
+    window.ethereum.on("accountsChanged", (accounts) => {
+      if (accounts.length === 0) {
+        userAddress = null;
+        signer = null;
+        contract = null;
+        updateConnectBtn(null);
+        updateSubmitState();
+      } else {
+        setupProvider();
+      }
+    });
+
+    window.ethereum.on("chainChanged", () => {
+      setupProvider();
+    });
+
+    // Auto-connect if already authorised
+    window.ethereum.request({ method: "eth_accounts" }).then((accounts) => {
+      if (accounts.length > 0) setupProvider();
+    });
+  }
+
+  // Load messages immediately (no wallet needed for reads)
+  loadMessages();
+</script>
+</body>
+</html>
