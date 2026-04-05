@@ -1,0 +1,17 @@
+# Foundry build artifacts
+/out
+/cache
+
+# Environment variables
+.env
+.env.*
+
+# Coverage reports
+/lcov.info
+
+# Broadcast artifacts (keep these if you want deploy records)
+/broadcast/*/31337/
+
+# IDE
+.idea
+.vscode
