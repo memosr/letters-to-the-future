@@ -138,6 +138,29 @@
       box-shadow: 0 0 6px rgba(74, 222, 128, 0.7);
     }
 
+    #wallet-bar {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    #disconnect-btn {
+      background: none;
+      border: 1px solid rgba(240, 192, 96, 0.25);
+      border-radius: 8px;
+      color: var(--muted);
+      font-size: 0.8rem;
+      line-height: 1;
+      padding: 6px 10px;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+    }
+
+    #disconnect-btn:hover {
+      color: #fca5a5;
+      border-color: rgba(239, 68, 68, 0.4);
+    }
+
     /* Network warning */
     #network-warning {
       display: none;
@@ -656,10 +679,13 @@
     <div class="header-symbol">✦ &nbsp; ✦ &nbsp; ✦</div>
     <h1>Letters to the Future</h1>
     <p class="tagline">Leave a message on the blockchain — for someone you'll never meet, in a time you'll never see.</p>
-    <button id="connect-btn">
-      <span class="dot"></span>
-      <span id="connect-label">Connect Wallet</span>
-    </button>
+    <div id="wallet-bar">
+      <button id="connect-btn">
+        <span class="dot"></span>
+        <span id="connect-label">Connect Wallet</span>
+      </button>
+      <button id="disconnect-btn" style="display:none" title="Disconnect wallet">✕</button>
+    </div>
     <div id="network-warning">
       You're on the wrong network.
       <button id="switch-network-btn">Switch to Base</button>
@@ -822,6 +848,7 @@
   // ── DOM refs ────────────────────────────────────────────────────────────────
   const connectBtn     = document.getElementById("connect-btn");
   const connectLabel   = document.getElementById("connect-label");
+  const disconnectBtn  = document.getElementById("disconnect-btn");
   const networkWarning = document.getElementById("network-warning");
   const switchNetBtn   = document.getElementById("switch-network-btn");
   const messageInput   = document.getElementById("message-input");
@@ -959,10 +986,22 @@
     if (addr) {
       connectBtn.classList.add("connected");
       connectLabel.textContent = shorten(addr);
+      disconnectBtn.style.display = "";
     } else {
       connectBtn.classList.remove("connected");
       connectLabel.textContent = "Connect Wallet";
+      disconnectBtn.style.display = "none";
     }
+  }
+
+  function disconnectWallet() {
+    userAddress = null;
+    signer      = null;
+    contract    = null;
+    provider    = null;
+    updateConnectBtn(null);
+    updateSubmitState();
+    networkWarning.style.display = "none";
   }
 
   async function switchToBase() {
@@ -1185,6 +1224,7 @@
 
   // ── Event listeners ──────────────────────────────────────────────────────────
   connectBtn.addEventListener("click", () => { if (!userAddress) connectWallet(); });
+  disconnectBtn.addEventListener("click", disconnectWallet);
 
   switchNetBtn.addEventListener("click", async () => {
     await switchToBase();
