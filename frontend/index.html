@@ -833,6 +833,201 @@
       .stat-sep { display: none; }
       h1 { font-size: 2rem; }
     }
+
+    /* ── Mint button (card footer) ───────────────────────── */
+    .msg-card-footer {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 12px;
+    }
+
+    .msg-mint-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 11px;
+      background: transparent;
+      border: 1px solid rgba(240,192,96,0.18);
+      border-radius: 50px;
+      color: rgba(240,192,96,0.45);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.68rem;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .msg-mint-btn:hover {
+      border-color: var(--gold-dim);
+      color: var(--gold);
+      background: rgba(240,192,96,0.06);
+    }
+
+    /* ── Mint NFT modal ──────────────────────────────────── */
+    #mint-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    #mint-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(5, 5, 10, 0.84);
+      backdrop-filter: blur(7px);
+      -webkit-backdrop-filter: blur(7px);
+    }
+
+    #mint-dialog {
+      position: relative;
+      z-index: 1;
+      background: #0d0d17;
+      border: 1px solid rgba(240,192,96,0.22);
+      border-radius: 18px;
+      padding: 26px 24px 22px;
+      max-width: 400px;
+      width: 100%;
+      box-shadow: 0 28px 80px rgba(0,0,0,0.65), 0 0 0 1px rgba(240,192,96,0.04);
+      animation: fadeUp 0.22s ease;
+    }
+
+    .mint-dialog-heading {
+      font-size: 0.64rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gold-dim);
+      margin-bottom: 16px;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .nft-preview {
+      background: linear-gradient(145deg, #0b0b16, #10101e);
+      border: 1px solid rgba(240,192,96,0.16);
+      border-radius: 12px;
+      padding: 18px;
+      margin-bottom: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .nft-preview::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(240,192,96,0.055), transparent 70%);
+      pointer-events: none;
+    }
+
+    .nft-preview-title {
+      font-size: 0.6rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--gold);
+      opacity: 0.5;
+      margin-bottom: 10px;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .nft-preview-msg {
+      font-size: 0.87rem;
+      line-height: 1.75;
+      color: var(--white);
+      margin-bottom: 12px;
+      word-break: break-word;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 5;
+      -webkit-box-orient: vertical;
+    }
+
+    .nft-preview-addr {
+      font-size: 0.66rem;
+      color: var(--gold-dim);
+      font-family: 'Courier New', monospace;
+      letter-spacing: 0.04em;
+      opacity: 0.65;
+    }
+
+    .mint-fee-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 9px 13px;
+      background: rgba(240,192,96,0.035);
+      border: 1px solid rgba(240,192,96,0.1);
+      border-radius: 8px;
+      margin-bottom: 18px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.78rem;
+      color: var(--white-dim);
+    }
+
+    .mint-fee-amount {
+      color: var(--gold);
+      font-weight: 600;
+    }
+
+    .mint-dialog-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    #mint-cancel-btn {
+      flex: 1;
+      padding: 10px;
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 50px;
+      color: var(--white-dim);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.83rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    #mint-cancel-btn:hover { border-color: rgba(255,255,255,0.22); color: var(--white); }
+
+    #mint-confirm-btn {
+      flex: 2;
+      padding: 10px;
+      background: linear-gradient(135deg, #c89840, #f0c060);
+      border: none;
+      border-radius: 50px;
+      color: #0a0a0f;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.83rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    #mint-confirm-btn:hover:not(:disabled) {
+      box-shadow: 0 6px 24px rgba(240,192,96,0.3);
+      transform: translateY(-1px);
+    }
+
+    #mint-confirm-btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+
+    #mint-status {
+      margin-top: 13px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.8rem;
+      line-height: 1.55;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    #mint-status:empty { display: none; }
+    #mint-status.loading { color: var(--gold); }
+    #mint-status.success { color: #86efac; }
+    #mint-status.error   { color: #fca5a5; }
+    #mint-status a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
   </style>
 </head>
 <body>
@@ -1008,6 +1203,28 @@
 <!-- Toast notification -->
 <div id="toast" role="status" aria-live="polite"></div>
 
+<!-- Mint NFT Modal -->
+<div id="mint-modal" style="display:none" role="dialog" aria-modal="true" aria-labelledby="mint-dialog-heading">
+  <div id="mint-backdrop"></div>
+  <div id="mint-dialog">
+    <div class="mint-dialog-heading" id="mint-dialog-heading" data-i18n="mintAsNFT">Mint as NFT</div>
+    <div class="nft-preview">
+      <div class="nft-preview-title">Letters to the Future</div>
+      <p class="nft-preview-msg" id="mint-preview-msg"></p>
+      <div class="nft-preview-addr" id="mint-preview-addr"></div>
+    </div>
+    <div class="mint-fee-row">
+      <span data-i18n="mintFeeLabel">Mint fee</span>
+      <span class="mint-fee-amount">0.001 ETH</span>
+    </div>
+    <div class="mint-dialog-actions">
+      <button id="mint-cancel-btn" data-i18n="cancel">Cancel</button>
+      <button id="mint-confirm-btn" data-i18n="mintNFT">Mint NFT</button>
+    </div>
+    <div id="mint-status"></div>
+  </div>
+</div>
+
 <script type="module">
   import { ethers } from "https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.min.js";
 
@@ -1016,6 +1233,14 @@
   const BASE_CHAIN_ID    = 8453;
   const BASE_CHAIN_HEX   = "0x" + BASE_CHAIN_ID.toString(16);
   const BASESCAN         = "https://basescan.org";
+
+  // ── NFT config ─────────────────────────────────────────────────────────────
+  const NFT_ADDRESS  = "0x3C01937B5d7a800C960170F9AF47aBB4237CB6C6";
+  const NFT_MINT_FEE = "1000000000000000"; // 0.001 ETH in wei
+  const NFT_ABI = [
+    "function mint(string calldata message, uint256 timestamp) external payable",
+    "event Transfer(address indexed from, address indexed to, uint256 indexed tokenId)",
+  ];
 
   // Updated ABI — getMessages returns full struct with sender + timestamp
   const ABI = [
@@ -1075,6 +1300,13 @@
       noMessages:     "No messages yet",
       anonymousMode:  "Anonymous mode",
       anonTooltip:    "Your address is still on-chain, this only hides it visually",
+      mintAsNFT:      "Mint as NFT",
+      mintFeeLabel:   "Mint fee",
+      mintNFT:        "Mint NFT",
+      cancel:         "Cancel",
+      minting:        "Minting...",
+      viewOnOpenSea:  "View on OpenSea",
+      connectFirst:   "Connect wallet first",
     },
     tr: {
       title:          "Geleceğe Mektuplar",
@@ -1095,6 +1327,13 @@
       noMessages:     "Henüz mesaj yok",
       anonymousMode:  "Anonim mod",
       anonTooltip:    "Adresin zincirde saklanmaya devam eder, bu yalnızca görsel bir gizlemedir",
+      mintAsNFT:      "NFT olarak mint et",
+      mintFeeLabel:   "Mint ücreti",
+      mintNFT:        "Mint Et",
+      cancel:         "İptal",
+      minting:        "Mint ediliyor...",
+      viewOnOpenSea:  "OpenSea'da Görüntüle",
+      connectFirst:   "Önce cüzdanı bağla",
     },
   };
 
@@ -1536,8 +1775,27 @@
     textEl.className = "msg-text";
     textEl.textContent = text;
 
+    // Card footer — mint button
+    const cardFooter = document.createElement("div");
+    cardFooter.className = "msg-card-footer";
+
+    const mintBtn = document.createElement("button");
+    mintBtn.className = "msg-mint-btn";
+    mintBtn.dataset.i18n = "mintAsNFT";
+    mintBtn.textContent = t("mintAsNFT");
+    mintBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      if (!userAddress) {
+        showToast(t("connectFirst"));
+        return;
+      }
+      openMintModal(text, timestamp, address);
+    });
+    cardFooter.appendChild(mintBtn);
+
     card.appendChild(header);
     card.appendChild(textEl);
+    card.appendChild(cardFooter);
     return card;
   }
 
@@ -1559,6 +1817,106 @@
   anonToggle.addEventListener("change", () => {
     anonymousMode = anonToggle.checked;
     // Toggle only affects new messages being sent; existing cards are not re-rendered
+  });
+
+  // ── Mint NFT modal ────────────────────────────────────────────────────────────
+  const mintModal      = document.getElementById("mint-modal");
+  const mintBackdrop   = document.getElementById("mint-backdrop");
+  const mintPreviewMsg = document.getElementById("mint-preview-msg");
+  const mintPreviewAddr= document.getElementById("mint-preview-addr");
+  const mintCancelBtn  = document.getElementById("mint-cancel-btn");
+  const mintConfirmBtn = document.getElementById("mint-confirm-btn");
+  const mintStatusEl   = document.getElementById("mint-status");
+
+  let mintPending = null; // { message, timestamp, address }
+
+  function openMintModal(message, timestamp, address) {
+    mintPending = { message, timestamp, address };
+    mintPreviewMsg.textContent  = message;
+    mintPreviewAddr.textContent = shorten(address);
+    mintStatusEl.textContent    = "";
+    mintStatusEl.className      = "";
+    mintConfirmBtn.disabled     = false;
+    mintConfirmBtn.textContent  = t("mintNFT");
+    mintModal.style.display     = "flex";
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeMintModal() {
+    mintModal.style.display      = "none";
+    document.body.style.overflow = "";
+    mintPending = null;
+  }
+
+  function setMintStatus(type, html) {
+    mintStatusEl.className   = type;
+    mintStatusEl.innerHTML   = type === "loading"
+      ? `<div class="spinner"></div><span>${html}</span>`
+      : html;
+  }
+
+  async function doMint() {
+    if (!mintPending) return;
+
+    if (!userAddress || !signer) {
+      setMintStatus("error", t("connectFirst"));
+      return;
+    }
+
+    const { message, timestamp } = mintPending;
+
+    mintConfirmBtn.disabled    = true;
+    mintConfirmBtn.textContent = t("minting");
+    mintCancelBtn.disabled     = true;
+    setMintStatus("loading", t("minting"));
+
+    try {
+      const nftContract = new ethers.Contract(NFT_ADDRESS, NFT_ABI, signer);
+      const tx = await nftContract.mint(message, BigInt(timestamp), {
+        value: BigInt(NFT_MINT_FEE),
+      });
+      setMintStatus("loading", "Transaction sent — confirming on Base…");
+      const receipt = await tx.wait();
+
+      // Extract tokenId from Transfer event (ERC-721: Transfer(from=0x0, to, tokenId))
+      let tokenId = null;
+      const iface = new ethers.Interface(NFT_ABI);
+      for (const log of receipt.logs) {
+        try {
+          const parsed = iface.parseLog({ topics: log.topics, data: log.data });
+          if (parsed && parsed.name === "Transfer") {
+            tokenId = parsed.args.tokenId.toString();
+            break;
+          }
+        } catch (_) {}
+      }
+
+      const opensea = tokenId
+        ? `https://opensea.io/assets/base/${NFT_ADDRESS}/${tokenId}`
+        : `https://opensea.io/assets/base/${NFT_ADDRESS}`;
+
+      setMintStatus("success",
+        `✦ Minted! &nbsp;<a href="${opensea}" target="_blank" rel="noopener">${t("viewOnOpenSea")} ↗</a>`
+      );
+      mintConfirmBtn.textContent = "✓ Done";
+    } catch (e) {
+      if (e.code === 4001 || e.code === "ACTION_REJECTED") {
+        setMintStatus("error", "Transaction cancelled.");
+      } else {
+        setMintStatus("error", e.shortMessage || e.message || "Something went wrong.");
+      }
+      mintConfirmBtn.disabled    = false;
+      mintConfirmBtn.textContent = t("mintNFT");
+    } finally {
+      mintCancelBtn.disabled = false;
+    }
+  }
+
+  mintCancelBtn.addEventListener("click", closeMintModal);
+  mintBackdrop.addEventListener("click", closeMintModal);
+  mintConfirmBtn.addEventListener("click", doMint);
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && mintModal.style.display !== "none") closeMintModal();
   });
 
   // ── Event listeners ──────────────────────────────────────────────────────────
