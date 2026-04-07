@@ -1346,6 +1346,8 @@
     const msg = messageInput.value.trim();
     if (!msg || !contract) return;
 
+    const wasAnon = anonymousMode; // capture toggle state at send time
+
     submitBtn.disabled    = true;
     submitBtn.textContent = t("sending");
     messageInput.disabled = true;
@@ -1355,6 +1357,15 @@
       const tx = await contract.postMessage(msg);
       showStatus("loading", "Transaction sent — mining on Base…");
       const receipt = await tx.wait();
+
+      // Persist anonymous preference for this specific message
+      if (wasAnon) {
+        try {
+          const block = await provider.getBlock(receipt.blockNumber);
+          localStorage.setItem("anon:" + userAddress.toLowerCase() + ":" + block.timestamp, "1");
+        } catch (_) { /* non-critical */ }
+      }
+
       showStatus("success",
         `${t("messageSent")} &nbsp;<a href="${BASESCAN}/tx/${receipt.hash}" target="_blank" rel="noopener">${t("viewOnBasescan")} ↗</a>`
       );
@@ -1468,18 +1479,21 @@
     card.className = "msg-card";
     card.id = `msg-${idx}`;
 
+    // Check if this specific message was sent anonymously (stored at send time)
+    const isAnon = !!localStorage.getItem("anon:" + address.toLowerCase() + ":" + Number(timestamp));
+
     // Header row: avatar | sender info | copy button
     const header = document.createElement("div");
     header.className = "msg-header";
 
-    const avatar = anonymousMode ? makeAnonAvatar() : makeAvatar(address);
+    const avatar = isAnon ? makeAnonAvatar() : makeAvatar(address);
 
     const senderInfo = document.createElement("div");
     senderInfo.className = "msg-sender-info";
 
     const addrEl = document.createElement("div");
     addrEl.className = "msg-address";
-    if (anonymousMode) {
+    if (isAnon) {
       addrEl.textContent = `Stranger #${addrToStrangerNum(address)}`;
       addrEl.title = "";
     } else {
@@ -1508,11 +1522,11 @@
 
     header.appendChild(avatar);
     header.appendChild(senderInfo);
-    if (anonymousMode) {
+    if (isAnon) {
       const badge = document.createElement("span");
       badge.className = "anon-badge";
       badge.textContent = "🎭";
-      badge.title = "";
+      badge.title = "Sent anonymously";
       header.appendChild(badge);
     }
     header.appendChild(copyBtn);
@@ -1544,7 +1558,7 @@
   // ── Anonymous mode ────────────────────────────────────────────────────────────
   anonToggle.addEventListener("change", () => {
     anonymousMode = anonToggle.checked;
-    if (cachedMessages.length > 0) renderMessages();
+    // Toggle only affects new messages being sent; existing cards are not re-rendered
   });
 
   // ── Event listeners ──────────────────────────────────────────────────────────
