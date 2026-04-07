@@ -691,6 +691,131 @@
       opacity: 0;
     }
 
+    /* ── Anonymous mode toggle ──────────────────────────── */
+    .anon-toggle-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.78rem;
+      color: var(--white-dim);
+    }
+
+    .anon-toggle-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .toggle-switch {
+      position: relative;
+      width: 36px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+      position: absolute;
+    }
+
+    .toggle-track {
+      position: absolute;
+      inset: 0;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.1);
+      transition: background 0.25s, border-color 0.25s, box-shadow 0.25s;
+      cursor: pointer;
+    }
+
+    .toggle-thumb {
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.35);
+      transition: transform 0.25s cubic-bezier(.34,1.56,.64,1), background 0.25s;
+    }
+
+    .toggle-switch input:checked ~ .toggle-track {
+      background: rgba(240,192,96,0.16);
+      border-color: var(--gold-dim);
+      box-shadow: 0 0 10px rgba(240,192,96,0.18);
+    }
+
+    .toggle-switch input:checked ~ .toggle-track .toggle-thumb {
+      transform: translateX(16px);
+      background: var(--gold);
+    }
+
+    .anon-info-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      border: 1px solid rgba(240,192,96,0.22);
+      color: rgba(240,192,96,0.45);
+      font-size: 0.6rem;
+      font-family: 'Inter', sans-serif;
+      cursor: default;
+      flex-shrink: 0;
+      position: relative;
+    }
+
+    .anon-info-btn::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: calc(100% + 8px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(10,10,18,0.97);
+      border: 1px solid rgba(240,192,96,0.18);
+      border-radius: 9px;
+      padding: 8px 13px;
+      font-size: 0.71rem;
+      color: var(--white-dim);
+      width: max-content;
+      max-width: 230px;
+      white-space: normal;
+      text-align: center;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.18s;
+      font-style: normal;
+      letter-spacing: 0.02em;
+      z-index: 20;
+      backdrop-filter: blur(14px);
+    }
+
+    .anon-info-btn:hover::after { opacity: 1; }
+
+    /* Anonymous avatar */
+    .msg-avatar.anon {
+      background: rgba(255,255,255,0.05) !important;
+      border: 1px solid rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.3);
+      font-size: 1rem;
+      font-weight: 400;
+      letter-spacing: 0;
+    }
+
+    /* Mask badge on anon cards */
+    .anon-badge {
+      font-size: 0.78rem;
+      line-height: 1;
+      opacity: 0.55;
+    }
+
     /* ── Mobile ──────────────────────────────────────────── */
     @media (max-width: 600px) {
       .hero { padding: 56px 20px 44px; }
@@ -765,6 +890,17 @@
   <!-- Compose -->
   <section class="compose-section" id="compose">
     <div class="section-label" data-i18n="composeLabel">Your Letter</div>
+    <!-- Anonymous mode toggle -->
+    <div class="anon-toggle-row">
+      <label class="anon-toggle-label">
+        <span class="toggle-switch">
+          <input type="checkbox" id="anon-toggle" />
+          <span class="toggle-track"><span class="toggle-thumb"></span></span>
+        </span>
+        <span data-i18n="anonymousMode">Anonymous mode</span>
+      </label>
+      <span class="anon-info-btn" id="anon-info" data-tooltip="Your address is still on-chain, this only hides it visually">i</span>
+    </div>
     <textarea
       id="message-input"
       maxlength="280"
@@ -889,10 +1025,12 @@
   ];
 
   // ── State ───────────────────────────────────────────────────────────────────
-  let provider    = null;
-  let signer      = null;
-  let contract    = null;
-  let userAddress = null;
+  let provider      = null;
+  let signer        = null;
+  let contract      = null;
+  let userAddress   = null;
+  let anonymousMode = false;
+  let cachedMessages = [];
 
   // ── DOM refs ────────────────────────────────────────────────────────────────
   const connectBtn     = document.getElementById("connect-btn");
@@ -913,6 +1051,8 @@
   const langBtn        = document.getElementById("lang-btn");
   const langFlag       = document.getElementById("lang-flag");
   const langCode       = document.getElementById("lang-code");
+  const anonToggle     = document.getElementById("anon-toggle");
+  const anonInfo       = document.getElementById("anon-info");
 
   // ── i18n ────────────────────────────────────────────────────────────────────
   const TRANSLATIONS = {
@@ -933,6 +1073,8 @@
       viewOnBasescan: "View on Basescan",
       builtOnBase:    "Built on Base",
       noMessages:     "No messages yet",
+      anonymousMode:  "Anonymous mode",
+      anonTooltip:    "Your address is still on-chain, this only hides it visually",
     },
     tr: {
       title:          "Geleceğe Mektuplar",
@@ -951,6 +1093,8 @@
       viewOnBasescan: "Basescan'da Görüntüle",
       builtOnBase:    "Base üzerinde inşa edildi",
       noMessages:     "Henüz mesaj yok",
+      anonymousMode:  "Anonim mod",
+      anonTooltip:    "Adresin zincirde saklanmaya devam eder, bu yalnızca görsel bir gizlemedir",
     },
   };
 
@@ -984,6 +1128,7 @@
 
       if (!userAddress) connectLabel.textContent = t("connectWallet");
       updateCharCounter();
+      anonInfo.dataset.tooltip = t("anonTooltip");
     };
 
     if (animate) {
@@ -1063,6 +1208,23 @@
     el.style.background = `linear-gradient(135deg, hsl(${h1},${s}%,${l}%), hsl(${h2},${s}%,${Math.max(l - 10, 36)}%))`;
     el.textContent = addr.slice(2, 4).toUpperCase();
     return el;
+  }
+
+  function makeAnonAvatar() {
+    const el = document.createElement("div");
+    el.className = "msg-avatar anon";
+    el.textContent = "?";
+    return el;
+  }
+
+  // Deterministic stranger number from wallet address (same wallet → same number)
+  function addrToStrangerNum(addr) {
+    const hex = addr.toLowerCase().replace("0x", "");
+    let n = 0;
+    for (let i = 0; i < hex.length; i++) {
+      n = (n * 31 + parseInt(hex[i], 16)) % 9000;
+    }
+    return 1000 + n;
   }
 
   // ── Time helpers ────────────────────────────────────────────────────────────
@@ -1251,6 +1413,21 @@
     throw new Error("All RPC endpoints failed");
   }
 
+  function renderMessages() {
+    const messages = cachedMessages;
+    const count = messages.length;
+    if (count === 0) return;
+    const frag = document.createDocumentFragment();
+    for (let i = count - 1; i >= 0; i--) {
+      const m    = messages[i];
+      const card = buildCard(m.sender, m.text, m.timestamp, i);
+      card.style.animationDelay = `${(count - 1 - i) * 0.045}s`;
+      frag.appendChild(card);
+    }
+    messagesList.innerHTML = "";
+    messagesList.appendChild(frag);
+  }
+
   async function loadMessages() {
     messagesList.innerHTML = skeletonCard(3) + skeletonCard(2) + skeletonCard(2);
 
@@ -1274,16 +1451,8 @@
       statFirst.textContent  = formatStatDate(messages[0].timestamp);
       statLatest.textContent = timeAgo(messages[count - 1].timestamp);
 
-      // Render newest first with staggered animation
-      const frag = document.createDocumentFragment();
-      for (let i = count - 1; i >= 0; i--) {
-        const m    = messages[i];
-        const card = buildCard(m.sender, m.text, m.timestamp, i);
-        card.style.animationDelay = `${(count - 1 - i) * 0.045}s`;
-        frag.appendChild(card);
-      }
-      messagesList.innerHTML = "";
-      messagesList.appendChild(frag);
+      cachedMessages = Array.from(messages);
+      renderMessages();
 
     } catch (e) {
       console.error(e);
@@ -1303,15 +1472,20 @@
     const header = document.createElement("div");
     header.className = "msg-header";
 
-    const avatar = makeAvatar(address);
+    const avatar = anonymousMode ? makeAnonAvatar() : makeAvatar(address);
 
     const senderInfo = document.createElement("div");
     senderInfo.className = "msg-sender-info";
 
     const addrEl = document.createElement("div");
     addrEl.className = "msg-address";
-    addrEl.title = address;
-    addrEl.textContent = shorten(address);
+    if (anonymousMode) {
+      addrEl.textContent = `Stranger #${addrToStrangerNum(address)}`;
+      addrEl.title = "";
+    } else {
+      addrEl.title = address;
+      addrEl.textContent = shorten(address);
+    }
 
     const timeEl = document.createElement("div");
     timeEl.className = "msg-time";
@@ -1334,6 +1508,13 @@
 
     header.appendChild(avatar);
     header.appendChild(senderInfo);
+    if (anonymousMode) {
+      const badge = document.createElement("span");
+      badge.className = "anon-badge";
+      badge.textContent = "🎭";
+      badge.title = "";
+      header.appendChild(badge);
+    }
     header.appendChild(copyBtn);
 
     // Message text
@@ -1359,6 +1540,12 @@
   function shorten(addr) {
     return addr.slice(0, 6) + "…" + addr.slice(-4);
   }
+
+  // ── Anonymous mode ────────────────────────────────────────────────────────────
+  anonToggle.addEventListener("change", () => {
+    anonymousMode = anonToggle.checked;
+    if (cachedMessages.length > 0) renderMessages();
+  });
 
   // ── Event listeners ──────────────────────────────────────────────────────────
   connectBtn.addEventListener("click", () => { if (!userAddress) connectWallet(); });
