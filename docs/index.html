@@ -1028,6 +1028,95 @@
     #mint-status.success { color: #86efac; }
     #mint-status.error   { color: #fca5a5; }
     #mint-status a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+
+    /* ── Lock toggle ─────────────────────────────────────── */
+    .lock-toggle-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 12px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.78rem;
+      color: var(--white-dim);
+    }
+
+    .lock-toggle-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .lock-date-row {
+      margin-top: 10px;
+    }
+
+    #lock-date-input {
+      padding: 8px 12px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(240, 192, 96, 0.2);
+      border-radius: 8px;
+      color: var(--white);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.85rem;
+      outline: none;
+      cursor: pointer;
+      transition: border-color 0.2s;
+      color-scheme: dark;
+    }
+
+    #lock-date-input:focus { border-color: rgba(240, 192, 96, 0.42); }
+
+    /* ── Sealed / unsealed message states ────────────────── */
+    .sealed-text {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-style: italic;
+      color: var(--white-faint);
+      font-size: 0.92rem;
+    }
+
+    .sealed-countdown {
+      display: block;
+      margin-top: 5px;
+      font-size: 0.72rem;
+      color: rgba(240, 192, 96, 0.35);
+      font-family: 'Inter', sans-serif;
+      font-style: normal;
+      letter-spacing: 0.03em;
+    }
+
+    .unsealed-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      margin-top: 8px;
+      padding: 2px 9px;
+      background: rgba(74, 222, 128, 0.06);
+      border: 1px solid rgba(74, 222, 128, 0.18);
+      border-radius: 50px;
+      color: #86efac;
+      font-size: 0.68rem;
+      font-family: 'Inter', sans-serif;
+      letter-spacing: 0.03em;
+    }
+
+    .v1-badge {
+      display: inline-block;
+      margin-left: 6px;
+      padding: 1px 6px;
+      background: rgba(240,192,96,0.05);
+      border: 1px solid rgba(240,192,96,0.14);
+      border-radius: 4px;
+      font-size: 0.6rem;
+      color: var(--gold-dim);
+      font-family: 'Inter', sans-serif;
+      letter-spacing: 0.04em;
+      vertical-align: middle;
+      opacity: 0.6;
+    }
   </style>
 </head>
 <body>
@@ -1102,6 +1191,19 @@
       placeholder="What do you want the future to know? Write something that matters…"
       data-i18n-placeholder="placeholder"
     ></textarea>
+    <!-- Time capsule lock -->
+    <div class="lock-toggle-row">
+      <label class="lock-toggle-label">
+        <span class="toggle-switch">
+          <input type="checkbox" id="lock-toggle" />
+          <span class="toggle-track"><span class="toggle-thumb"></span></span>
+        </span>
+        <span data-i18n="lockUntil">🔒 Lock until...</span>
+      </label>
+    </div>
+    <div class="lock-date-row" id="lock-date-row" style="display:none">
+      <input type="date" id="lock-date-input" />
+    </div>
     <div class="compose-footer">
       <span id="char-counter">280 characters remaining</span>
       <button id="submit-btn" disabled data-i18n="sendToFuture">Send to the Future</button>
@@ -1172,12 +1274,12 @@
     <div class="footer-row">
       <div class="footer-links">
         <a
-          href="https://basescan.org/address/0x526a3e3ace6f5ef40ec8ddb8e87995f9a8271000"
+          href="https://basescan.org/address/0x8FeF460431Ae853fA74fA53f9B005de5cb9Df0EF"
           target="_blank"
           rel="noopener"
           class="contract-addr"
-          title="View contract on Basescan"
-        >0x526a…1000</a>
+          title="View V2 contract on Basescan"
+        >0x8FeF…f0EF</a>
         <span class="sep">&nbsp;·&nbsp;</span>
         <a href="https://github.com/memosr/letters-to-the-future" target="_blank" rel="noopener">GitHub</a>
       </div>
@@ -1229,32 +1331,39 @@
   import { ethers } from "https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.min.js";
 
   // ── Config ─────────────────────────────────────────────────────────────────
-  const CONTRACT_ADDRESS = "0x526a3e3ace6f5ef40ec8ddb8e87995f9a8271000";
-  const BASE_CHAIN_ID    = 8453;
-  const BASE_CHAIN_HEX   = "0x" + BASE_CHAIN_ID.toString(16);
-  const BASESCAN         = "https://basescan.org";
+  const V1_ADDRESS    = "0x526a3e3ace6f5ef40ec8ddb8e87995f9a8271000";
+  const V2_ADDRESS    = "0x8FeF460431Ae853fA74fA53f9B005de5cb9Df0EF";
+  const BASE_CHAIN_ID = 8453;
+  const BASE_CHAIN_HEX = "0x" + BASE_CHAIN_ID.toString(16);
+  const BASESCAN       = "https://basescan.org";
 
   // ── NFT config ─────────────────────────────────────────────────────────────
   const NFT_ADDRESS  = "0x3C01937B5d7a800C960170F9AF47aBB4237CB6C6";
-  const NFT_MINT_FEE = "1000000000000000"; // 0.001 ETH in wei
+  const NFT_MINT_FEE = "1000000000000000";
   const NFT_ABI = [
     "function mint(string calldata message, uint256 timestamp) external payable",
     "event Transfer(address indexed from, address indexed to, uint256 indexed tokenId)",
   ];
 
-  // Updated ABI — getMessages returns full struct with sender + timestamp
-  const ABI = [
-    "function postMessage(string calldata message) external",
+  // V1 ABI — read-only, original signature (no unlockTime)
+  const V1_ABI = [
     "function getMessages() external view returns (tuple(address sender, uint96 timestamp, string text)[] memory)",
+  ];
+
+  // V2 ABI — new signature with unlockTime
+  const V2_ABI = [
+    "function postMessage(string calldata message, uint256 unlockTime) external",
+    "function getMessages() external view returns (tuple(address sender, uint96 timestamp, uint256 unlockTime, string text)[] memory)",
     "function getMessageCount() external view returns (uint256)",
   ];
 
   // ── State ───────────────────────────────────────────────────────────────────
   let provider      = null;
   let signer        = null;
-  let contract      = null;
+  let contractV2    = null;
   let userAddress   = null;
   let anonymousMode = false;
+  let lockEnabled   = false;
   let cachedMessages = [];
 
   // ── DOM refs ────────────────────────────────────────────────────────────────
@@ -1278,6 +1387,9 @@
   const langCode       = document.getElementById("lang-code");
   const anonToggle     = document.getElementById("anon-toggle");
   const anonInfo       = document.getElementById("anon-info");
+  const lockToggle     = document.getElementById("lock-toggle");
+  const lockDateRow    = document.getElementById("lock-date-row");
+  const lockDateInput  = document.getElementById("lock-date-input");
 
   // ── i18n ────────────────────────────────────────────────────────────────────
   const TRANSLATIONS = {
@@ -1307,6 +1419,16 @@
       minting:        "Minting...",
       viewOnOpenSea:  "View on OpenSea",
       connectFirst:   "Connect wallet first",
+      lockUntil:      "🔒 Lock until...",
+      sealedUntil:    "Sealed until",
+      unsealed:       "Unsealed",
+      openIn:         "Open in",
+      year:           "year",
+      years:          "years",
+      month:          "month",
+      months:         "months",
+      day:            "day",
+      days:           "days",
     },
     tr: {
       title:          "Geleceğe Mektuplar",
@@ -1334,6 +1456,16 @@
       minting:        "Mint ediliyor...",
       viewOnOpenSea:  "OpenSea'da Görüntüle",
       connectFirst:   "Önce cüzdanı bağla",
+      lockUntil:      "🔒 Şu tarihe kadar kilitle...",
+      sealedUntil:    "Şu tarihe kadar kapalı",
+      unsealed:       "Açıldı",
+      openIn:         "Açılacak:",
+      year:           "yıl",
+      years:          "yıl",
+      month:          "ay",
+      months:         "ay",
+      day:            "gün",
+      days:           "gün",
     },
   };
 
@@ -1512,7 +1644,7 @@
     networkWarning.style.display = "none";
     signer      = await provider.getSigner();
     userAddress = await signer.getAddress();
-    contract    = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
+    contractV2  = new ethers.Contract(V2_ADDRESS, V2_ABI, signer);
 
     updateConnectBtn(userAddress);
     updateSubmitState();
@@ -1534,7 +1666,7 @@
   function disconnectWallet() {
     userAddress = null;
     signer      = null;
-    contract    = null;
+    contractV2  = null;
     provider    = null;
     updateConnectBtn(null);
     updateSubmitState();
@@ -1583,9 +1715,16 @@
   // ── Submit ───────────────────────────────────────────────────────────────────
   submitBtn.addEventListener("click", async () => {
     const msg = messageInput.value.trim();
-    if (!msg || !contract) return;
+    if (!msg || !contractV2) return;
 
-    const wasAnon = anonymousMode; // capture toggle state at send time
+    const wasAnon = anonymousMode;
+
+    // Compute unlockTime (0 = no lock)
+    let unlockTime = 0n;
+    if (lockEnabled && lockDateInput.value) {
+      const ts = Math.floor(new Date(lockDateInput.value + "T00:00:00").getTime() / 1000);
+      unlockTime = BigInt(ts);
+    }
 
     submitBtn.disabled    = true;
     submitBtn.textContent = t("sending");
@@ -1593,7 +1732,7 @@
     showStatus("loading", t("sending"));
 
     try {
-      const tx = await contract.postMessage(msg);
+      const tx = await contractV2.postMessage(msg, unlockTime);
       showStatus("loading", "Transaction sent — mining on Base…");
       const receipt = await tx.wait();
 
@@ -1669,8 +1808,7 @@
     if (count === 0) return;
     const frag = document.createDocumentFragment();
     for (let i = count - 1; i >= 0; i--) {
-      const m    = messages[i];
-      const card = buildCard(m.sender, m.text, m.timestamp, i);
+      const card = buildCard(messages[i], i);
       card.style.animationDelay = `${(count - 1 - i) * 0.045}s`;
       frag.appendChild(card);
     }
@@ -1682,26 +1820,48 @@
     messagesList.innerHTML = skeletonCard(3) + skeletonCard(2) + skeletonCard(2);
 
     try {
-      const readProvider = provider || await getFallbackProvider();
-      const readContract = new ethers.Contract(CONTRACT_ADDRESS, ABI, readProvider);
-      const messages     = await readContract.getMessages();
+      const rp = provider || await getFallbackProvider();
+      const cv1 = new ethers.Contract(V1_ADDRESS, V1_ABI, rp);
+      const cv2 = new ethers.Contract(V2_ADDRESS, V2_ABI, rp);
 
-      if (!messages || messages.length === 0) {
-        msgCount.textContent  = "";
-        statTotal.textContent = "0";
+      const [v1Raw, v2Raw] = await Promise.all([
+        cv1.getMessages().catch(() => []),
+        cv2.getMessages().catch(() => []),
+      ]);
+
+      // Normalize V1 messages (no unlockTime) and tag source
+      const v1 = Array.from(v1Raw).map(m => ({
+        sender:     m.sender,
+        timestamp:  m.timestamp,
+        unlockTime: 0n,
+        text:       m.text,
+        source:     "v1",
+      }));
+
+      const v2 = Array.from(v2Raw).map(m => ({
+        sender:     m.sender,
+        timestamp:  m.timestamp,
+        unlockTime: m.unlockTime,
+        text:       m.text,
+        source:     "v2",
+      }));
+
+      const all = [...v1, ...v2].sort((a, b) => Number(a.timestamp) - Number(b.timestamp));
+
+      if (all.length === 0) {
+        msgCount.textContent   = "";
+        statTotal.textContent  = "0";
         messagesList.innerHTML = `<div class="feed-empty">${t("noMessages")}</div>`;
         return;
       }
 
-      const count = messages.length;
-      msgCount.textContent = `${count} letter${count !== 1 ? "s" : ""}`;
-
-      // Update stats bar
+      const count = all.length;
+      msgCount.textContent   = `${count} letter${count !== 1 ? "s" : ""}`;
       statTotal.textContent  = count.toLocaleString();
-      statFirst.textContent  = formatStatDate(messages[0].timestamp);
-      statLatest.textContent = timeAgo(messages[count - 1].timestamp);
+      statFirst.textContent  = formatStatDate(all[0].timestamp);
+      statLatest.textContent = timeAgo(all[count - 1].timestamp);
 
-      cachedMessages = Array.from(messages);
+      cachedMessages = all;
       renderMessages();
 
     } catch (e) {
@@ -1713,15 +1873,39 @@
     }
   }
 
-  function buildCard(address, text, timestamp, idx) {
+  function formatUnlockDate(unlockTime) {
+    return new Date(Number(unlockTime) * 1000).toLocaleDateString(
+      currentLang === "tr" ? "tr-TR" : "en-US",
+      { month: "long", day: "numeric", year: "numeric" }
+    );
+  }
+
+  function timeUntilUnlock(unlockTime) {
+    const diff = Number(unlockTime) - Math.floor(Date.now() / 1000);
+    if (diff <= 0) return "";
+    const years  = Math.floor(diff / 31536000);
+    const months = Math.floor((diff % 31536000) / 2592000);
+    const days   = Math.floor((diff % 2592000) / 86400);
+    const parts  = [];
+    if (years  > 0) parts.push(`${years} ${years  === 1 ? t("year")  : t("years")}`);
+    if (months > 0 && years < 10) parts.push(`${months} ${months === 1 ? t("month") : t("months")}`);
+    if (days   > 0 && years === 0 && months < 3) parts.push(`${days} ${days === 1 ? t("day") : t("days")}`);
+    return parts.join(", ");
+  }
+
+  function buildCard(m, idx) {
+    const { sender: address, text, timestamp, unlockTime, source } = m;
     const card = document.createElement("div");
     card.className = "msg-card";
     card.id = `msg-${idx}`;
 
-    // Check if this specific message was sent anonymously (stored at send time)
+    const now      = Math.floor(Date.now() / 1000);
+    const isLocked = Number(unlockTime) > 0;
+    const isSealed = isLocked && Number(unlockTime) > now;
+
     const isAnon = !!localStorage.getItem("anon:" + address.toLowerCase() + ":" + Number(timestamp));
 
-    // Header row: avatar | sender info | copy button
+    // ── Header ──────────────────────────────────────────────
     const header = document.createElement("div");
     header.className = "msg-header";
 
@@ -1734,10 +1918,15 @@
     addrEl.className = "msg-address";
     if (isAnon) {
       addrEl.textContent = `Stranger #${addrToStrangerNum(address)}`;
-      addrEl.title = "";
     } else {
       addrEl.title = address;
       addrEl.textContent = shorten(address);
+    }
+    if (source === "v1") {
+      const v1b = document.createElement("span");
+      v1b.className = "v1-badge";
+      v1b.textContent = "V1";
+      addrEl.appendChild(v1b);
     }
 
     const timeEl = document.createElement("div");
@@ -1756,8 +1945,9 @@
       <path d="M1.5 8.5V2a1 1 0 011-1H9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
     </svg>`;
     copyBtn.addEventListener("click", () => {
-      navigator.clipboard.writeText(text).then(() => showToast("Copied to clipboard ✦"));
+      if (!isSealed) navigator.clipboard.writeText(text).then(() => showToast("Copied to clipboard ✦"));
     });
+    if (isSealed) copyBtn.style.display = "none";
 
     header.appendChild(avatar);
     header.appendChild(senderInfo);
@@ -1770,31 +1960,57 @@
     }
     header.appendChild(copyBtn);
 
-    // Message text
-    const textEl = document.createElement("p");
-    textEl.className = "msg-text";
-    textEl.textContent = text;
+    // ── Body ────────────────────────────────────────────────
+    const body = document.createElement("div");
 
-    // Card footer — mint button
+    if (isSealed) {
+      // Show sealed placeholder
+      const sealedEl = document.createElement("p");
+      sealedEl.className = "msg-text";
+      const sealedInner = document.createElement("span");
+      sealedInner.className = "sealed-text";
+      sealedInner.textContent = `🔒 ${t("sealedUntil")} ${formatUnlockDate(unlockTime)}`;
+      const countdown = document.createElement("span");
+      countdown.className = "sealed-countdown";
+      const remaining = timeUntilUnlock(unlockTime);
+      if (remaining) countdown.textContent = `${t("openIn")} ${remaining}`;
+      sealedEl.appendChild(sealedInner);
+      if (remaining) sealedEl.appendChild(countdown);
+      body.appendChild(sealedEl);
+    } else {
+      const textEl = document.createElement("p");
+      textEl.className = "msg-text";
+      textEl.textContent = text;
+      body.appendChild(textEl);
+
+      // Unsealed badge for messages that had a lock but are now past
+      if (isLocked) {
+        const unsealedBadge = document.createElement("span");
+        unsealedBadge.className = "unsealed-badge";
+        unsealedBadge.textContent = `🔓 ${t("unsealed")} ${formatUnlockDate(unlockTime)}`;
+        body.appendChild(unsealedBadge);
+      }
+    }
+
+    // ── Card footer — mint button ────────────────────────────
     const cardFooter = document.createElement("div");
     cardFooter.className = "msg-card-footer";
 
-    const mintBtn = document.createElement("button");
-    mintBtn.className = "msg-mint-btn";
-    mintBtn.dataset.i18n = "mintAsNFT";
-    mintBtn.textContent = t("mintAsNFT");
-    mintBtn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      if (!userAddress) {
-        showToast(t("connectFirst"));
-        return;
-      }
-      openMintModal(text, timestamp, address);
-    });
-    cardFooter.appendChild(mintBtn);
+    if (!isSealed) {
+      const mintBtn = document.createElement("button");
+      mintBtn.className = "msg-mint-btn";
+      mintBtn.dataset.i18n = "mintAsNFT";
+      mintBtn.textContent = t("mintAsNFT");
+      mintBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (!userAddress) { showToast(t("connectFirst")); return; }
+        openMintModal(text, timestamp, address);
+      });
+      cardFooter.appendChild(mintBtn);
+    }
 
     card.appendChild(header);
-    card.appendChild(textEl);
+    card.appendChild(body);
     card.appendChild(cardFooter);
     return card;
   }
@@ -1816,7 +2032,23 @@
   // ── Anonymous mode ────────────────────────────────────────────────────────────
   anonToggle.addEventListener("change", () => {
     anonymousMode = anonToggle.checked;
-    // Toggle only affects new messages being sent; existing cards are not re-rendered
+  });
+
+  // ── Lock toggle ───────────────────────────────────────────────────────────────
+  function setDefaultLockDate() {
+    const d = new Date();
+    d.setFullYear(d.getFullYear() + 1);
+    lockDateInput.value = d.toISOString().slice(0, 10);
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    lockDateInput.min = tomorrow.toISOString().slice(0, 10);
+    lockDateInput.max = "2100-12-31";
+  }
+
+  lockToggle.addEventListener("change", () => {
+    lockEnabled = lockToggle.checked;
+    lockDateRow.style.display = lockEnabled ? "" : "none";
+    if (lockEnabled) setDefaultLockDate();
   });
 
   // ── Mint NFT modal ────────────────────────────────────────────────────────────
@@ -1931,7 +2163,7 @@
   if (window.ethereum) {
     window.ethereum.on("accountsChanged", (accounts) => {
       if (accounts.length === 0) {
-        userAddress = signer = contract = null;
+        userAddress = signer = contractV2 = null;
         updateConnectBtn(null);
         updateSubmitState();
       } else {
