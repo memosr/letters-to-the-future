@@ -816,6 +816,111 @@
       opacity: 0.55;
     }
 
+    /* ── Letter of the Day ───────────────────────────────── */
+    .lotd-section {
+      position: relative;
+      z-index: 1;
+      padding: 52px 24px 48px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: linear-gradient(180deg, transparent 0%, rgba(240,192,96,0.018) 50%, transparent 100%);
+    }
+
+    .lotd-label {
+      font-size: 0.68rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--gold);
+      opacity: 0.85;
+      margin-bottom: 22px;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .lotd-card {
+      position: relative;
+      width: 100%;
+      max-width: 640px;
+      padding: 32px 36px 28px;
+      background: rgba(240, 192, 96, 0.022);
+      border: 1px solid rgba(240, 192, 96, 0.3);
+      border-radius: 20px;
+      overflow: hidden;
+      animation: lotd-pulse 5s ease-in-out infinite;
+    }
+
+    .lotd-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 10%; right: 10%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(240,192,96,0.55), transparent);
+    }
+
+    .lotd-card::after {
+      content: '"';
+      position: absolute;
+      top: 8px;
+      right: 22px;
+      font-size: 5.5rem;
+      line-height: 1;
+      color: rgba(240,192,96,0.055);
+      font-family: Georgia, serif;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    @keyframes lotd-pulse {
+      0%, 100% {
+        box-shadow:
+          0 0 0 1px rgba(240,192,96,0.06),
+          0 0 44px rgba(240,192,96,0.08),
+          0 20px 60px rgba(0,0,0,0.22);
+      }
+      50% {
+        box-shadow:
+          0 0 0 1px rgba(240,192,96,0.13),
+          0 0 64px rgba(240,192,96,0.15),
+          0 20px 60px rgba(0,0,0,0.28);
+      }
+    }
+
+    .lotd-text {
+      font-size: 1.1rem;
+      line-height: 1.88;
+      color: var(--white);
+      word-break: break-word;
+      margin-bottom: 22px;
+      font-style: italic;
+    }
+
+    .lotd-meta {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      padding-top: 18px;
+      border-top: 1px solid rgba(240,192,96,0.09);
+    }
+
+    .lotd-sender-info {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .lotd-sender {
+      font-size: 0.77rem;
+      color: var(--gold-dim);
+      font-family: 'Courier New', monospace;
+      letter-spacing: 0.04em;
+    }
+
+    .lotd-date {
+      font-size: 0.68rem;
+      color: var(--white-faint);
+      font-style: italic;
+    }
+
     /* ── Mobile ──────────────────────────────────────────── */
     @media (max-width: 600px) {
       .hero { padding: 56px 20px 44px; }
@@ -826,6 +931,8 @@
       .compose-footer { flex-direction: column; align-items: stretch; }
       #submit-btn { text-align: center; }
       .footer-row { flex-direction: column; align-items: flex-start; }
+      .lotd-card { padding: 24px 22px 22px; }
+      .lotd-text { font-size: 1rem; }
     }
 
     @media (max-width: 380px) {
@@ -1150,6 +1257,21 @@
   </div>
 </section>
 
+<!-- ── Letter of the Day ──────────────────────────────────────── -->
+<div id="lotd-section" class="lotd-section" style="display:none" aria-label="Letter of the Day">
+  <div class="lotd-label" data-i18n="lotdTitle">✦ Letter of the Day</div>
+  <div id="lotd-card" class="lotd-card">
+    <p id="lotd-text" class="lotd-text"></p>
+    <div class="lotd-meta">
+      <div id="lotd-avatar"></div>
+      <div class="lotd-sender-info">
+        <div id="lotd-sender" class="lotd-sender"></div>
+        <div id="lotd-date" class="lotd-date"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ── Stats bar ────────────────────────────────────────────── -->
 <div class="stats-bar">
   <div class="stat">
@@ -1429,6 +1551,7 @@
       months:         "months",
       day:            "day",
       days:           "days",
+      lotdTitle:      "✦ Letter of the Day",
     },
     tr: {
       title:          "Geleceğe Mektuplar",
@@ -1466,6 +1589,7 @@
       months:         "ay",
       day:            "gün",
       days:           "gün",
+      lotdTitle:      "✦ Günün Mektubu",
     },
   };
 
@@ -1763,6 +1887,42 @@
     }
   });
 
+  // ── Letter of the Day ────────────────────────────────────────────────────────
+  function hashDate(s) {
+    let h = 0;
+    for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+    return h;
+  }
+
+  function renderLetterOfTheDay(messages) {
+    const lotdSection = document.getElementById("lotd-section");
+    const now = Math.floor(Date.now() / 1000);
+    const unlocked = messages.filter(m => !(Number(m.unlockTime) > 0 && Number(m.unlockTime) > now));
+
+    if (unlocked.length === 0) {
+      lotdSection.style.display = "none";
+      return;
+    }
+
+    const today = new Date().toISOString().slice(0, 10);
+    const m = unlocked[hashDate(today) % unlocked.length];
+    const isAnon = !!localStorage.getItem("anon:" + m.sender.toLowerCase() + ":" + Number(m.timestamp));
+
+    document.getElementById("lotd-text").textContent = m.text;
+
+    const senderEl = document.getElementById("lotd-sender");
+    senderEl.textContent = isAnon ? `Stranger #${addrToStrangerNum(m.sender)}` : shorten(m.sender);
+    if (!isAnon) senderEl.title = m.sender;
+
+    document.getElementById("lotd-date").textContent = formatStatDate(m.timestamp);
+
+    const avatarContainer = document.getElementById("lotd-avatar");
+    avatarContainer.innerHTML = "";
+    avatarContainer.appendChild(isAnon ? makeAnonAvatar() : makeAvatar(m.sender));
+
+    lotdSection.style.display = "";
+  }
+
   // ── Load messages ────────────────────────────────────────────────────────────
   function skeletonCard(lineCount) {
     const lines = [
@@ -1863,6 +2023,7 @@
 
       cachedMessages = all;
       renderMessages();
+      renderLetterOfTheDay(all);
 
     } catch (e) {
       console.error(e);
