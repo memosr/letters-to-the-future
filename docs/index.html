@@ -323,15 +323,28 @@
     }
 
     #char-counter {
-      font-size: 0.78rem;
-      color: var(--white-faint);
-      font-family: 'Inter', sans-serif;
-      transition: color 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
       flex-shrink: 0;
     }
 
-    #char-counter.warn { color: #fbbf24; }
-    #char-counter.over { color: #f87171; }
+    #char-ring {
+      transition: stroke-dashoffset 0.3s ease, stroke 0.3s ease;
+    }
+
+    #char-text {
+      font-size: 0.78rem;
+      color: var(--white-faint);
+      font-family: 'Inter', sans-serif;
+      transition: color 0.3s;
+      min-width: 50px;
+    }
+
+    #char-counter.warn  #char-ring,
+    #char-counter.warn  #char-text  { stroke: #fb923c; color: #fb923c; }
+    #char-counter.danger #char-ring,
+    #char-counter.danger #char-text { stroke: #f87171; color: #f87171; }
 
     #submit-btn {
       padding: 12px 28px;
@@ -950,6 +963,7 @@
       .stat-label { font-size: 0.62rem; }
       .compose-section { padding: 22px 18px; margin-top: 44px; }
       .compose-footer { flex-direction: column; align-items: stretch; }
+      #char-counter { align-self: flex-start; }
       #submit-btn { text-align: center; }
       .footer-row { flex-direction: column; align-items: flex-start; }
       .lotd-card { padding: 24px 22px 22px; }
@@ -1348,7 +1362,15 @@
       <input type="date" id="lock-date-input" />
     </div>
     <div class="compose-footer">
-      <span id="char-counter">280 characters remaining</span>
+      <div id="char-counter">
+        <svg width="44" height="44" viewBox="0 0 44 44" aria-hidden="true">
+          <circle cx="22" cy="22" r="18" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="3"/>
+          <circle id="char-ring" cx="22" cy="22" r="18" fill="none" stroke="#f0c060" stroke-width="3"
+            stroke-dasharray="113.097" stroke-dashoffset="113.097"
+            stroke-linecap="round" transform="rotate(-90 22 22)"/>
+        </svg>
+        <span id="char-text">0 / 280</span>
+      </div>
       <button id="submit-btn" disabled data-i18n="sendToFuture">Send to the Future</button>
     </div>
     <div id="status-area"></div>
@@ -1517,6 +1539,10 @@
   const switchNetBtn   = document.getElementById("switch-network-btn");
   const messageInput   = document.getElementById("message-input");
   const charCounter    = document.getElementById("char-counter");
+  const charRing       = document.getElementById("char-ring");
+  const charText       = document.getElementById("char-text");
+  const CHAR_LIMIT     = 280;
+  const RING_CIRCUM    = 2 * Math.PI * 18; // ≈113.097
   const submitBtn      = document.getElementById("submit-btn");
   const statusArea     = document.getElementById("status-area");
   const messagesList   = document.getElementById("messages-list");
@@ -1844,9 +1870,11 @@
 
   // ── Character counter ────────────────────────────────────────────────────────
   function updateCharCounter() {
-    const len = messageInput.value.length;
-    charCounter.textContent = `${280 - len} ${t("charsRemaining")}`;
-    charCounter.className   = len > 260 ? (len >= 280 ? "over" : "warn") : "";
+    const len  = messageInput.value.length;
+    const pct  = Math.min(len / CHAR_LIMIT, 1);
+    charRing.style.strokeDashoffset = RING_CIRCUM * (1 - pct);
+    charText.textContent = `${len} / ${CHAR_LIMIT}`;
+    charCounter.className = pct >= 0.9 ? "danger" : pct >= 0.7 ? "warn" : "";
   }
 
   messageInput.addEventListener("input", () => {
