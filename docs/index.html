@@ -500,6 +500,26 @@
       background: rgba(240,192,96,0.06);
     }
 
+    .msg-share-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px; height: 28px;
+      border: 1px solid rgba(240,192,96,0.12);
+      border-radius: 7px;
+      background: transparent;
+      color: rgba(240,192,96,0.35);
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: border-color 0.2s, color 0.2s, background 0.2s;
+    }
+
+    .msg-share-btn:hover {
+      border-color: rgba(240,192,96,0.38);
+      color: var(--gold);
+      background: rgba(240,192,96,0.06);
+    }
+
     .msg-text {
       font-size: 0.96rem;
       line-height: 1.8;
@@ -1553,6 +1573,7 @@
       day:            "day",
       days:           "days",
       lotdTitle:      "✦ Letter of the Day",
+      shareOnX:       "Share on X",
     },
     tr: {
       title:          "Geleceğe Mektuplar",
@@ -1591,6 +1612,7 @@
       day:            "gün",
       days:           "gün",
       lotdTitle:      "✦ Günün Mektubu",
+      shareOnX:       "X'te Paylaş",
     },
   };
 
@@ -2111,6 +2133,22 @@
     });
     if (isSealed) copyBtn.style.display = "none";
 
+    const shareBtn = document.createElement("button");
+    shareBtn.className = "msg-share-btn";
+    shareBtn.title = t("shareOnX");
+    shareBtn.setAttribute("aria-label", t("shareOnX"));
+    shareBtn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.259 5.632L18.244 2.25zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77z"/>
+    </svg>`;
+    shareBtn.addEventListener("click", () => {
+      const siteUrl = "https://letters-to-the-future.vercel.app/";
+      const preview = text.length > 180 ? text.slice(0, 180) + "..." : text;
+      const tweetText = `📜 A letter to the future: "${preview}" — read more letters at ${siteUrl}`;
+      const shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`;
+      window.open(shareUrl, "_blank", "noopener,noreferrer");
+    });
+    if (isSealed) shareBtn.style.display = "none";
+
     header.appendChild(avatar);
     header.appendChild(senderInfo);
     if (isAnon) {
@@ -2121,6 +2159,7 @@
       header.appendChild(badge);
     }
     header.appendChild(copyBtn);
+    header.appendChild(shareBtn);
 
     // ── Body ────────────────────────────────────────────────
     const body = document.createElement("div");
