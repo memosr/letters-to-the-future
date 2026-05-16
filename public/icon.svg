@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <radialGradient id="bg-grad" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="#0f1a35"/>
+      <stop offset="100%" stop-color="#0a0e1f"/>
+    </radialGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#f0c060" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#f0c060" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="envelope-glow">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1024" height="1024" rx="120" fill="url(#bg-grad)"/>
+
+  <!-- Stars -->
+  <g fill="#ffffff" opacity="0.7">
+    <circle cx="120" cy="90" r="1.8"/>
+    <circle cx="260" cy="150" r="1.2"/>
+    <circle cx="380" cy="70" r="2.2"/>
+    <circle cx="520" cy="110" r="1.5"/>
+    <circle cx="680" cy="60" r="1.8"/>
+    <circle cx="820" cy="130" r="1.2"/>
+    <circle cx="940" cy="80" r="2.0"/>
+    <circle cx="90" cy="220" r="1.4"/>
+    <circle cx="200" cy="300" r="1.8"/>
+    <circle cx="140" cy="450" r="1.2"/>
+    <circle cx="60" cy="560" r="2.0"/>
+    <circle cx="180" cy="650" r="1.5"/>
+    <circle cx="100" cy="780" r="1.8"/>
+    <circle cx="200" cy="900" r="1.2"/>
+    <circle cx="900" cy="220" r="1.5"/>
+    <circle cx="960" cy="340" r="2.0"/>
+    <circle cx="880" cy="480" r="1.2"/>
+    <circle cx="950" cy="620" r="1.8"/>
+    <circle cx="870" cy="750" r="1.4"/>
+    <circle cx="920" cy="870" r="2.0"/>
+    <circle cx="310" cy="920" r="1.5"/>
+    <circle cx="460" cy="960" r="1.2"/>
+    <circle cx="620" cy="930" r="1.8"/>
+    <circle cx="760" cy="890" r="1.4"/>
+  </g>
+  <!-- Brighter accent stars -->
+  <g fill="#f0c060" opacity="0.6">
+    <circle cx="150" cy="180" r="1.5"/>
+    <circle cx="720" cy="95" r="2.0"/>
+    <circle cx="870" cy="300" r="1.5"/>
+    <circle cx="75" cy="680" r="2.0"/>
+    <circle cx="950" cy="750" r="1.5"/>
+    <circle cx="400" cy="940" r="2.0"/>
+  </g>
+
+  <!-- Glow behind envelope -->
+  <ellipse cx="512" cy="512" rx="300" ry="260" fill="url(#glow)"/>
+
+  <!-- Envelope body -->
+  <g filter="url(#envelope-glow)">
+    <rect x="262" y="362" width="500" height="340" rx="18" fill="none" stroke="#f0c060" stroke-width="8" opacity="0.9"/>
+    <rect x="262" y="362" width="500" height="340" rx="18" fill="#f0c060" fill-opacity="0.06"/>
+    <!-- Envelope flap (V shape) -->
+    <polyline points="262,362 512,540 762,362" fill="none" stroke="#f0c060" stroke-width="8" stroke-linejoin="round" opacity="0.9"/>
+    <!-- Bottom fold lines -->
+    <line x1="262" y1="702" x2="430" y2="532" stroke="#f0c060" stroke-width="5" opacity="0.5"/>
+    <line x1="762" y1="702" x2="594" y2="532" stroke="#f0c060" stroke-width="5" opacity="0.5"/>
+  </g>
+
+  <!-- Small wax seal dot -->
+  <circle cx="512" cy="620" r="18" fill="#f0c060" opacity="0.7"/>
+  <circle cx="512" cy="620" r="10" fill="#0a0e1f" opacity="0.8"/>
+</svg>

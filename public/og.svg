@@ -1,0 +1,139 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <radialGradient id="bg-og" cx="50%" cy="40%" r="75%">
+      <stop offset="0%" stop-color="#0f1a35"/>
+      <stop offset="100%" stop-color="#0a0e1f"/>
+    </radialGradient>
+    <radialGradient id="og-glow" cx="50%" cy="45%" r="45%">
+      <stop offset="0%" stop-color="#f0c060" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#f0c060" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="og-title-glow">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="badge-glow">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg-og)"/>
+  <rect width="1200" height="630" fill="url(#og-glow)"/>
+
+  <!-- Stars -->
+  <g fill="#ffffff">
+    <circle cx="45" cy="35" r="1.5" opacity="0.7"/>
+    <circle cx="120" cy="80" r="1.0" opacity="0.5"/>
+    <circle cx="200" cy="25" r="2.0" opacity="0.6"/>
+    <circle cx="310" cy="55" r="1.2" opacity="0.7"/>
+    <circle cx="440" cy="30" r="1.8" opacity="0.5"/>
+    <circle cx="580" cy="45" r="1.0" opacity="0.7"/>
+    <circle cx="700" cy="20" r="1.5" opacity="0.6"/>
+    <circle cx="820" cy="65" r="2.0" opacity="0.5"/>
+    <circle cx="950" cy="35" r="1.2" opacity="0.7"/>
+    <circle cx="1060" cy="55" r="1.8" opacity="0.6"/>
+    <circle cx="1150" cy="28" r="1.5" opacity="0.5"/>
+    <circle cx="30" cy="160" r="1.2" opacity="0.6"/>
+    <circle cx="90" cy="250" r="1.8" opacity="0.4"/>
+    <circle cx="55" cy="380" r="1.5" opacity="0.6"/>
+    <circle cx="20" cy="490" r="1.2" opacity="0.5"/>
+    <circle cx="70" cy="580" r="1.8" opacity="0.7"/>
+    <circle cx="1170" cy="150" r="1.5" opacity="0.6"/>
+    <circle cx="1140" cy="280" r="1.2" opacity="0.4"/>
+    <circle cx="1180" cy="400" r="1.8" opacity="0.6"/>
+    <circle cx="1110" cy="530" r="1.5" opacity="0.5"/>
+    <circle cx="160" cy="580" r="1.2" opacity="0.7"/>
+    <circle cx="340" cy="600" r="1.8" opacity="0.5"/>
+    <circle cx="520" cy="590" r="1.5" opacity="0.6"/>
+    <circle cx="700" cy="610" r="1.2" opacity="0.7"/>
+    <circle cx="880" cy="595" r="1.8" opacity="0.5"/>
+    <circle cx="1050" cy="605" r="1.5" opacity="0.6"/>
+    <circle cx="240" cy="130" r="1.0" opacity="0.5"/>
+    <circle cx="760" cy="110" r="1.5" opacity="0.6"/>
+  </g>
+  <g fill="#f0c060" opacity="0.5">
+    <circle cx="160" cy="48" r="1.8"/>
+    <circle cx="480" cy="70" r="2.2"/>
+    <circle cx="730" cy="38" r="1.8"/>
+    <circle cx="1000" cy="60" r="2.2"/>
+    <circle cx="40" cy="300" r="1.8"/>
+    <circle cx="1160" cy="320" r="2.2"/>
+    <circle cx="100" cy="520" r="1.8"/>
+    <circle cx="940" cy="615" r="2.2"/>
+  </g>
+
+  <!-- Envelope icon -->
+  <g transform="translate(195, 235)" filter="url(#badge-glow)" opacity="0.8">
+    <rect x="0" y="0" width="120" height="82" rx="5" fill="none" stroke="#f0c060" stroke-width="2.5"/>
+    <rect x="0" y="0" width="120" height="82" rx="5" fill="#f0c060" fill-opacity="0.05"/>
+    <polyline points="0,0 60,54 120,0" fill="none" stroke="#f0c060" stroke-width="2.5" stroke-linejoin="round"/>
+    <line x1="0" y1="82" x2="40" y2="42" stroke="#f0c060" stroke-width="1.8" opacity="0.5"/>
+    <line x1="120" y1="82" x2="80" y2="42" stroke="#f0c060" stroke-width="1.8" opacity="0.5"/>
+    <circle cx="60" cy="62" r="6" fill="#f0c060" opacity="0.6"/>
+    <circle cx="60" cy="62" r="3.5" fill="#0a0e1f" opacity="0.8"/>
+  </g>
+
+  <!-- Main title -->
+  <text
+    x="600"
+    y="242"
+    text-anchor="middle"
+    font-family="Georgia, 'Times New Roman', serif"
+    font-size="72"
+    font-weight="normal"
+    fill="#f0c060"
+    filter="url(#og-title-glow)"
+    letter-spacing="2"
+  >Letters to the Future</text>
+
+  <!-- Divider -->
+  <line x1="350" y1="270" x2="850" y2="270" stroke="#f0c060" stroke-width="1" opacity="0.28"/>
+
+  <!-- Description -->
+  <text
+    x="600"
+    y="326"
+    text-anchor="middle"
+    font-family="Georgia, 'Times New Roman', serif"
+    font-style="italic"
+    font-size="26"
+    fill="#f0ece4"
+    opacity="0.68"
+  >Permanent messages on Base</text>
+  <text
+    x="600"
+    y="366"
+    text-anchor="middle"
+    font-family="Georgia, 'Times New Roman', serif"
+    font-style="italic"
+    font-size="22"
+    fill="#f0ece4"
+    opacity="0.55"
+  >For someone you&#x2019;ll never meet, in a time you&#x2019;ll never see</text>
+
+  <!-- Feature pills -->
+  <g font-family="Georgia, sans-serif" font-size="16" fill="#f0c060" text-anchor="middle">
+    <rect x="338" y="416" width="120" height="32" rx="16" fill="#f0c060" fill-opacity="0.12" stroke="#f0c060" stroke-opacity="0.35" stroke-width="1"/>
+    <text x="398" y="437" opacity="0.85">Time Capsules</text>
+
+    <rect x="476" y="416" width="100" height="32" rx="16" fill="#f0c060" fill-opacity="0.12" stroke="#f0c060" stroke-opacity="0.35" stroke-width="1"/>
+    <text x="526" y="437" opacity="0.85">Anonymous</text>
+
+    <rect x="594" y="416" width="80" height="32" rx="16" fill="#f0c060" fill-opacity="0.12" stroke="#f0c060" stroke-opacity="0.35" stroke-width="1"/>
+    <text x="634" y="437" opacity="0.85">NFT Mint</text>
+
+    <rect x="692" y="416" width="130" height="32" rx="16" fill="#f0c060" fill-opacity="0.12" stroke="#f0c060" stroke-opacity="0.35" stroke-width="1"/>
+    <text x="757" y="437" opacity="0.85">Daily Featured</text>
+  </g>
+
+  <!-- Built on Base badge — bottom right corner -->
+  <g transform="translate(960, 530)" filter="url(#badge-glow)">
+    <rect x="0" y="0" width="200" height="60" rx="30" fill="#0052ff" fill-opacity="0.85" stroke="#f0c060" stroke-width="1.5" stroke-opacity="0.5"/>
+    <!-- Base logo circle -->
+    <circle cx="34" cy="30" r="16" fill="#ffffff" fill-opacity="0.15"/>
+    <circle cx="34" cy="30" r="10" fill="#ffffff" fill-opacity="0.9"/>
+    <text x="110" y="35" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#ffffff" opacity="0.95">Built on Base</text>
+  </g>
+</svg>
