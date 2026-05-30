@@ -1504,6 +1504,7 @@
   const BASE_CHAIN_ID = 8453;
   const BASE_CHAIN_HEX = "0x" + BASE_CHAIN_ID.toString(16);
   const BASESCAN       = "https://basescan.org";
+  const BUILDER_CODE   = "62635f61356d6c3468376d0b0080218021802180218021802180218021";
 
   // ── NFT config ─────────────────────────────────────────────────────────────
   const NFT_ADDRESS  = "0x3C01937B5d7a800C960170F9AF47aBB4237CB6C6";
@@ -1910,7 +1911,9 @@
     showStatus("loading", t("sending"));
 
     try {
-      const tx = await contractV2.postMessage(msg, unlockTime);
+      const populated = await contractV2.postMessage.populateTransaction(msg, unlockTime);
+      populated.data = populated.data + BUILDER_CODE;
+      const tx = await signer.sendTransaction(populated);
       showStatus("loading", "Transaction sent — mining on Base…");
       const receipt = await tx.wait();
 
@@ -2336,9 +2339,11 @@
 
     try {
       const nftContract = new ethers.Contract(NFT_ADDRESS, NFT_ABI, signer);
-      const tx = await nftContract.mint(message, BigInt(timestamp), {
+      const populated = await nftContract.mint.populateTransaction(message, BigInt(timestamp), {
         value: BigInt(NFT_MINT_FEE),
       });
+      populated.data = populated.data + BUILDER_CODE;
+      const tx = await signer.sendTransaction(populated);
       setMintStatus("loading", "Transaction sent — confirming on Base…");
       const receipt = await tx.wait();
 
