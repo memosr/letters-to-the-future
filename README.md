@@ -1,183 +1,95 @@
-# 📬 Letters to the Future
+# Letters to the Future
 
-> **An on-chain message board on Base mainnet — write words that last forever.**
+An on-chain message board on Base where anyone can write a letter, lock it as a time capsule, and mint it as a fully on-chain NFT.
 
-[![Base](https://img.shields.io/badge/Network-Base%20Mainnet-0052FF?style=flat&logo=base&logoColor=white)](https://base.org)
-[![Solidity](https://img.shields.io/badge/Solidity-^0.8.20-363636?style=flat&logo=solidity)](https://soliditylang.org)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Tests](https://img.shields.io/badge/Tests-Passing-brightgreen?style=flat&logo=github-actions)](test/LettersToTheFuture.t.sol)
+![Screenshot](./assets/screenshot.png)
 
----
+## Live Demo
 
-## 📸 Screenshots
+https://letters-to-the-future.vercel.app/
 
-| Feed | Write a Letter |
-|------|---------------|
-| *(screenshot)* | *(screenshot)* |
+Also available as a Farcaster / Base Mini App.
 
-> 🌐 **Live at:** [memosr.github.io/letters-to-the-future](https://memosr.github.io/letters-to-the-future/index.html)
+## Contracts
 
----
+All contracts are deployed on Base Mainnet (chainId 8453).
 
-## 💌 What is it?
+| Contract | Address | Role |
+|----------|---------|------|
+| LettersToTheFutureV2 | [`0x8FeF460431Ae853fA74fA53f9B005de5cb9Df0EF`](https://basescan.org/address/0x8FeF460431Ae853fA74fA53f9B005de5cb9Df0EF) | Active message board with time capsule support |
+| LetterNFT | [`0x3C01937B5d7a800C960170F9AF47aBB4237CB6C6`](https://basescan.org/address/0x3C01937B5d7a800C960170F9AF47aBB4237CB6C6) | ERC-721 for minting letters as on-chain SVG NFTs |
+| LettersToTheFuture (V1) | [`0x526A3e3ACe6f5eF40Ec8ddB8E87995f9A8271000`](https://basescan.org/address/0x526A3e3ACe6f5eF40Ec8ddB8E87995f9A8271000) | Legacy contract, still read for older letters |
 
-Letters to the Future is a permissionless, on-chain message board deployed on Base mainnet. Anyone with a wallet can write a short message — up to 280 characters — and that message is stored permanently on the blockchain, visible to anyone, forever.
+## Features
 
-No accounts. No servers. No delete button. Just you, your words, and the chain.
+- Write letters up to 280 characters, stored permanently on-chain
+- Time capsule mode: set an unlock date and the UI keeps the letter sealed until then
+- Mint any letter as an ERC-721 NFT with fully on-chain SVG artwork (0.001 ETH mint fee)
+- Anonymous display mode that hides your address in the UI
+- Runs as a Farcaster / Base Mini App with wallet connect via any EIP-1193 wallet
 
-Think of it as a time capsule you drop into the blockchain: a note to strangers, to the future, to yourself.
+## Tech Stack
 
----
+- Solidity ^0.8.20 with Foundry (forge, cast, anvil) for build, test, and deploy
+- OpenZeppelin Contracts (ERC-721, Base64, Strings)
+- Vanilla HTML/CSS/JS frontend, no framework, no build step
+- ethers.js v6
+- Farcaster Mini App SDK
+- Base Mainnet
 
-## ⚙️ How it works
-
-1. **Connect wallet** — click "Connect Wallet" and approve with MetaMask or any EIP-1193 wallet on Base mainnet
-2. **Write your letter** — compose a message up to 280 characters
-3. **Sign the transaction** — one transaction, no ETH cost beyond gas (~fractions of a cent on Base)
-4. **It lives on-chain forever** — your message, your address, and timestamp are stored in contract state and emitted as an event — immutable and permanent
-
----
-
-## 🛠️ Tech Stack
-
-| Layer | Technology |
-|-------|-----------|
-| Smart contract | Solidity `^0.8.20` |
-| Testing & deployment | [Foundry](https://book.getfoundry.sh/) (forge, cast, anvil) |
-| Frontend | Vanilla JS + HTML/CSS (no frameworks) |
-| Blockchain library | [ethers.js v6](https://docs.ethers.org/v6/) |
-| Network | [Base Mainnet](https://base.org) (chainId 8453) |
-| Hosting | GitHub Pages |
-
----
-
-## 🚀 Local Development
+## Getting Started
 
 ### Prerequisites
 
-- [Foundry](https://book.getfoundry.sh/getting-started/installation) installed
-- A `.env` file with your keys (see below)
+- [Foundry](https://book.getfoundry.sh/getting-started/installation)
 
-### Setup
+### Clone and install
 
 ```bash
 git clone https://github.com/memosr/letters-to-the-future.git
 cd letters-to-the-future
-
-# Install Foundry dependencies
 forge install
 ```
 
-### Build
+### Build and test
 
 ```bash
 forge build
-```
-
-### Test
-
-```bash
 forge test
 ```
 
-Run with verbosity for event traces:
+### Environment
 
-```bash
-forge test -vvv
-```
-
-### Deploy to Base Mainnet
-
-Create a `.env` file:
+Create a `.env` file in the project root:
 
 ```env
-PRIVATE_KEY=your_private_key_here
-BASESCAN_API_KEY=your_basescan_api_key_here
+PRIVATE_KEY=your_private_key
+BASESCAN_API_KEY=your_basescan_api_key
 ```
 
-Then deploy and verify:
+> **Warning:** Never commit your `.env` file or share your private key. Use a dedicated deployer wallet.
+
+### Deploy
 
 ```bash
-forge script script/Deploy.s.sol \
-  --rpc-url base \
-  --broadcast \
-  --verify \
-  -vvvv
+# Message board (V2)
+forge script script/DeployV2.s.sol --rpc-url base --broadcast --verify -vvvv
+
+# Letter NFT
+forge script script/DeployLetterNFT.s.sol --rpc-url base --broadcast --verify -vvvv
 ```
 
----
+### Run the frontend
 
-## 📄 Contract Details
+The frontend is a single static page. Serve the `docs/` folder with any static server:
 
-| Field | Value |
-|-------|-------|
-| **Address** | [`0x526a3e3ace6f5ef40ec8ddb8e87995f9a8271000`](https://basescan.org/address/0x526a3e3ace6f5ef40ec8ddb8e87995f9a8271000) |
-| **Network** | Base Mainnet (chainId 8453) |
-| **Max message length** | 280 bytes |
-
-### Functions
-
-```solidity
-// Write a new message (max 280 bytes, must be non-empty)
-function postMessage(string calldata message) external
-
-// Read all messages ever posted
-function getMessages() external view returns (Message[] memory)
-
-// Get the total number of messages posted
-function getMessageCount() external view returns (uint256)
+```bash
+cd docs
+python3 -m http.server 8000
 ```
 
-### Events
+Then open http://localhost:8000.
 
-```solidity
-event MessagePosted(
-    address indexed sender,
-    uint256 indexed index,
-    uint96  timestamp,
-    string  text
-);
-```
+## License
 
-### Errors
-
-```solidity
-error EmptyMessage();                              // message is zero bytes
-error MessageTooLong(uint256 length, uint256 max); // message exceeds 280 bytes
-```
-
-### Message struct
-
-```solidity
-struct Message {
-    address sender;     // wallet that posted the message
-    uint96  timestamp;  // block.timestamp at post time (packed into one slot with sender)
-    string  text;       // the message content
-}
-```
-
----
-
-## 🤝 Contributing
-
-Contributions, ideas, and letters are welcome.
-
-1. Fork the repo
-2. Create a feature branch (`git checkout -b feat/my-idea`)
-3. Make your changes and add tests
-4. Run `forge test` — all tests must pass
-5. Open a pull request
-
-Please keep PRs focused. If you're changing contract logic, include tests that cover the new behavior.
-
----
-
-## 📜 License
-
-[MIT](LICENSE) — free to use, fork, and build upon.
-
----
-
-<p align="center">
-  Made with ☕ and a belief that some words deserve to last.
-</p>
+[MIT](LICENSE)
